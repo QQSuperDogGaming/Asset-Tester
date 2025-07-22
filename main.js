@@ -1,16 +1,29 @@
 let game;
 let isMobile = false;
 let joystickVector = { x: 0, y: 0 };
+let selectedDevice = null;
+
+window.addEventListener('load', () => {
+  document.getElementById('deviceModal').style.display = 'flex';
+});
+
+function selectDevice(type) {
+  isMobile = type === 'mobile';
+  selectedDevice = type;
+  document.getElementById('deviceModal').style.display = 'none';
+}
 
 document.getElementById('uploadBtn').addEventListener('click', () => {
   document.getElementById('fileInput').click();
 });
 
 document.getElementById('loadSprite').addEventListener('click', () => {
+  if (!selectedDevice) return alert('Please select a device first!');
+
   const fileInput = document.getElementById('fileInput');
   const frameWidth = parseInt(document.getElementById('frameWidth').value, 10);
   const frameHeight = parseInt(document.getElementById('frameHeight').value, 10);
-  isMobile = document.getElementById('deviceType').value === 'mobile';
+  const fps = parseInt(document.getElementById('fpsInput').value, 10) || 10;
 
   if (fileInput.files.length === 0) return alert('Please upload a sprite sheet');
   const file = fileInput.files[0];
@@ -34,13 +47,17 @@ document.getElementById('loadSprite').addEventListener('click', () => {
 
     game = new Phaser.Game({
       type: Phaser.AUTO,
-      width: 600,
-      height: 400,
+      width: 800,
+      height: 500,
       backgroundColor: '#1d1d1d',
       parent: 'gameContainer',
       physics: {
         default: 'arcade',
         arcade: { debug: false }
+      },
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
       },
       scene: { preload, create, update }
     });
@@ -53,25 +70,21 @@ document.getElementById('loadSprite').addEventListener('click', () => {
     }
 
     function create() {
-      const animKey = 'defaultAnim';
-      const totalFrames = Math.floor(this.textures.get('sprite').frameTotal);
+      const totalFrames = this.textures.get('sprite').frameTotal;
 
       this.anims.create({
-        key: animKey,
+        key: 'autoAnim',
         frames: this.anims.generateFrameNumbers('sprite', {
           start: 0,
           end: totalFrames - 1
         }),
-        frameRate: 10,
+        frameRate: fps,
         repeat: -1
       });
 
-      const player = this.physics.add.sprite(300, 200, 'sprite');
-      player.play(animKey);
-
-      // Auto scale to fit height if needed
-      const scale = Math.min(100 / frameHeight, 2);
-      player.setScale(scale);
+      const player = this.physics.add.sprite(400, 250, 'sprite');
+      player.play('autoAnim');
+      player.setScale(Math.min(100 / frameHeight, 2));
 
       this.player = player;
       this.bullets = this.physics.add.group();
@@ -109,7 +122,7 @@ document.getElementById('loadSprite').addEventListener('click', () => {
         if (c.down.isDown) this.player.setVelocityY(speed);
         if (Phaser.Input.Keyboard.JustDown(this.fireKey) && this.shootCooldown <= 0) {
           const bullet = this.bullets.create(this.player.x, this.player.y, 'sprite');
-          bullet.play('defaultAnim');
+          bullet.play('autoAnim');
           bullet.setVelocityX(300);
           this.shootCooldown = 300;
         }
