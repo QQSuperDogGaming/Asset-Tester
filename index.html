@@ -12,21 +12,10 @@
 
     <!-- Device Type -->
     <label>
-      Device Type:
+      Choose Device:
       <select id="deviceType">
-        <option value="auto">Auto Detect</option>
         <option value="desktop">Desktop</option>
         <option value="mobile">Mobile</option>
-      </select>
-    </label><br /><br />
-
-    <!-- Asset Type -->
-    <label>
-      Asset Type:
-      <select id="assetType">
-        <option value="character">Character</option>
-        <option value="projectile">Projectile</option>
-        <option value="effect">Effect</option>
       </select>
     </label><br /><br />
 
@@ -40,25 +29,10 @@
     </label>
     <label>
       Frame Height: <input type="number" id="frameHeight" value="32" />
-    </label><br />
-
-    <!-- Animation Definitions -->
-    <label>
-      Animations (e.g. walk:0-3, idle:4-7):
-      <input type="text" id="animDefs" value="walk:0-3" />
-    </label><br />
-
-    <!-- Animation Selector -->
-    <label>
-      Play Animation:
-      <select id="animSelect"></select>
-    </label><br /><br />
-
-    <!-- Buttons -->
+    </label>
     <button id="loadSprite">▶️ Load Sprite</button>
-    <button id="darkModeToggle">🌙 Toggle Dark Mode</button>
 
-    <!-- Loading Bar -->
+    <!-- Progress -->
     <div id="progressBarContainer">
       <div id="progressBar"></div>
     </div>
