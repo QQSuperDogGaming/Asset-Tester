@@ -37,10 +37,11 @@ body {
   transition: width 0.2s;
 }
 
-#uploadStatus {
+#uploadStatus, #importStatus {
   margin-top: 5px;
   font-size: 14px;
   color: #0f0;
+  font-weight: bold;
 }
 
 #gameBox {
@@ -78,6 +79,10 @@ body {
   touch-action: none;
 }
 
+#joystick.active {
+  background: rgba(0, 255, 0, 0.3);
+}
+
 #jumpBtn {
   padding: 12px 20px;
   font-size: 18px;
@@ -85,6 +90,11 @@ body {
   color: white;
   border: none;
   border-radius: 8px;
+}
+
+#jumpBtn.flash {
+  background: #0f0 !important;
+  color: #000 !important;
 }
 
 /* Modal for device selection */
