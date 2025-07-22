@@ -1,35 +1,22 @@
 let game;
-let spriteTextureKey = 'userSprite';
-let currentSprite;
-let joystickVector = { x: 0, y: 0 };
-let animSelect = document.getElementById('animSelect');
-let animDefsInput = document.getElementById('animDefs');
 let isMobile = false;
+let joystickVector = { x: 0, y: 0 };
 
 document.getElementById('uploadBtn').addEventListener('click', () => {
   document.getElementById('fileInput').click();
-});
-
-document.getElementById('darkModeToggle').addEventListener('click', () => {
-  document.body.classList.toggle('dark');
 });
 
 document.getElementById('loadSprite').addEventListener('click', () => {
   const fileInput = document.getElementById('fileInput');
   const frameWidth = parseInt(document.getElementById('frameWidth').value, 10);
   const frameHeight = parseInt(document.getElementById('frameHeight').value, 10);
-  const assetType = document.getElementById('assetType').value;
-  const selectedDevice = document.getElementById('deviceType').value;
-
-  isMobile = selectedDevice === 'auto'
-    ? /Mobi|Android/i.test(navigator.userAgent)
-    : selectedDevice === 'mobile';
+  isMobile = document.getElementById('deviceType').value === 'mobile';
 
   if (fileInput.files.length === 0) return alert('Please upload a sprite sheet');
   const file = fileInput.files[0];
   const reader = new FileReader();
 
-  reader.onprogress = (e) => {
+  reader.onprogress = e => {
     if (e.lengthComputable) {
       const percent = (e.loaded / e.total) * 100;
       document.getElementById('progressBarContainer').style.display = 'block';
@@ -42,11 +29,8 @@ document.getElementById('loadSprite').addEventListener('click', () => {
     document.getElementById('uploadStatus').textContent = '✅ Upload Completed';
 
     if (game) game.destroy(true);
-    if (isMobile) {
-      document.getElementById('mobileControls').style.display = 'flex';
-    } else {
-      document.getElementById('mobileControls').style.display = 'none';
-    }
+    if (isMobile) document.getElementById('mobileControls').style.display = 'flex';
+    else document.getElementById('mobileControls').style.display = 'none';
 
     game = new Phaser.Game({
       type: Phaser.AUTO,
@@ -62,124 +46,76 @@ document.getElementById('loadSprite').addEventListener('click', () => {
     });
 
     function preload() {
-      this.load.spritesheet(spriteTextureKey, e.target.result, {
+      this.load.spritesheet('sprite', e.target.result, {
         frameWidth,
         frameHeight
       });
     }
 
     function create() {
-      const assetType = document.getElementById('assetType').value;
+      const animKey = 'defaultAnim';
+      const totalFrames = Math.floor(this.textures.get('sprite').frameTotal);
 
-      // Parse animations like "walk:0-3, idle:4-7"
-      function defineAnimations(scene) {
-        const animDefs = animDefsInput.value.split(',');
-        animSelect.innerHTML = '';
-        animDefs.forEach(def => {
-          const [name, range] = def.trim().split(':');
-          const [start, end] = range.split('-').map(Number);
-          if (!isNaN(start) && !isNaN(end)) {
-            scene.anims.create({
-              key: name,
-              frames: scene.anims.generateFrameNumbers(spriteTextureKey, { start, end }),
-              frameRate: 10,
-              repeat: -1
-            });
-            const opt = document.createElement('option');
-            opt.value = name;
-            opt.innerText = name;
-            animSelect.appendChild(opt);
-          }
+      this.anims.create({
+        key: animKey,
+        frames: this.anims.generateFrameNumbers('sprite', {
+          start: 0,
+          end: totalFrames - 1
+        }),
+        frameRate: 10,
+        repeat: -1
+      });
+
+      const player = this.physics.add.sprite(300, 200, 'sprite');
+      player.play(animKey);
+
+      // Auto scale to fit height if needed
+      const scale = Math.min(100 / frameHeight, 2);
+      player.setScale(scale);
+
+      this.player = player;
+      this.bullets = this.physics.add.group();
+      this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+      if (!isMobile) {
+        this.cursors = this.input.keyboard.addKeys({
+          up: 'W',
+          down: 'S',
+          left: 'A',
+          right: 'D'
         });
-      }
-
-      if (assetType === 'character') {
-        currentSprite = this.physics.add.sprite(300, 200, spriteTextureKey).setScale(2);
-        defineAnimations(this);
-        currentSprite.play(animSelect.value);
-        this.bullets = this.physics.add.group();
-
-        if (isMobile) {
-          setupJoystick();
-          document.getElementById('jumpBtn').addEventListener('touchstart', () => {
-            joystickVector.y = -1;
-          });
-          document.getElementById('jumpBtn').addEventListener('touchend', () => {
-            joystickVector.y = 0;
-          });
-        } else {
-          this.cursors = this.input.keyboard.addKeys({
-            up: 'W',
-            down: 'S',
-            left: 'A',
-            right: 'D'
-          });
-          this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        }
-      }
-
-      if (assetType === 'projectile') {
-        defineAnimations(this);
-        this.bullets = this.physics.add.group();
-        this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-      }
-
-      if (assetType === 'effect') {
-        defineAnimations(this);
-        this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+      } else {
+        setupJoystick();
+        document.getElementById('jumpBtn').addEventListener('touchstart', () => {
+          joystickVector.y = -1;
+        });
+        document.getElementById('jumpBtn').addEventListener('touchend', () => {
+          joystickVector.y = 0;
+        });
       }
 
       this.shootCooldown = 0;
     }
 
     function update(_, delta) {
-      const assetType = document.getElementById('assetType').value;
+      const speed = 200;
+      this.player.setVelocity(0);
 
-      if (assetType === 'character') {
-        currentSprite.setVelocity(0);
-        const speed = 200;
-
-        if (!isMobile) {
-          const c = this.cursors;
-          if (c.left.isDown) currentSprite.setVelocityX(-speed);
-          if (c.right.isDown) currentSprite.setVelocityX(speed);
-          if (c.up.isDown) currentSprite.setVelocityY(-speed);
-          if (c.down.isDown) currentSprite.setVelocityY(speed);
-          if (Phaser.Input.Keyboard.JustDown(this.fireKey) && this.shootCooldown <= 0) {
-            const bullet = this.bullets.create(currentSprite.x, currentSprite.y, spriteTextureKey);
-            bullet.play(animSelect.value);
-            bullet.setVelocityX(300);
-            this.shootCooldown = 300;
-          }
-        } else {
-          currentSprite.setVelocityX(joystickVector.x * speed);
-          currentSprite.setVelocityY(joystickVector.y * speed);
-        }
-
-        if (currentSprite.anims.currentAnim?.key !== animSelect.value) {
-          currentSprite.play(animSelect.value);
-        }
-      }
-
-      if (assetType === 'projectile') {
+      if (!isMobile) {
+        const c = this.cursors;
+        if (c.left.isDown) this.player.setVelocityX(-speed);
+        if (c.right.isDown) this.player.setVelocityX(speed);
+        if (c.up.isDown) this.player.setVelocityY(-speed);
+        if (c.down.isDown) this.player.setVelocityY(speed);
         if (Phaser.Input.Keyboard.JustDown(this.fireKey) && this.shootCooldown <= 0) {
-          const proj = this.bullets.create(100, 200, spriteTextureKey).setScale(2);
-          proj.play(animSelect.value);
-          proj.setVelocityX(300);
+          const bullet = this.bullets.create(this.player.x, this.player.y, 'sprite');
+          bullet.play('defaultAnim');
+          bullet.setVelocityX(300);
           this.shootCooldown = 300;
         }
-      }
-
-      if (assetType === 'effect') {
-        if (Phaser.Input.Keyboard.JustDown(this.fireKey)) {
-          const fx = game.scene.scenes[0].add.sprite(
-            Phaser.Math.Between(100, 500),
-            Phaser.Math.Between(100, 300),
-            spriteTextureKey
-          ).setScale(2);
-          fx.play(animSelect.value);
-          fx.on('animationcomplete', () => fx.destroy());
-        }
+      } else {
+        this.player.setVelocityX(joystickVector.x * speed);
+        this.player.setVelocityY(joystickVector.y * speed);
       }
 
       if (this.shootCooldown > 0) this.shootCooldown -= delta;
