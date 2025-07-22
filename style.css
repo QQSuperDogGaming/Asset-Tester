@@ -6,7 +6,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: background 0.3s, color 0.3s;
 }
 
 #controls {
@@ -47,7 +46,6 @@ body {
 #gameContainer {
   margin-top: 10px;
   border: 2px solid #555;
-  position: relative;
 }
 
 #mobileControls {
@@ -76,24 +74,4 @@ body {
   color: white;
   border: none;
   border-radius: 8px;
-}
-
-/* Dark mode toggle */
-body.dark {
-  background: #fff;
-  color: #000;
-}
-
-body.dark #controls {
-  background: #eee;
-  color: #000;
-}
-
-body.dark #progressBar {
-  background: #00aa00;
-}
-
-body.dark #mobileControls #jumpBtn {
-  background: #ddd;
-  color: #000;
 }
