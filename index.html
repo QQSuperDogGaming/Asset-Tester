@@ -10,6 +10,17 @@
   <div id="controls">
     <h1>2D Asset Tester</h1>
 
+    <!-- Device Type -->
+    <label>
+      Device Type:
+      <select id="deviceType">
+        <option value="auto">Auto Detect</option>
+        <option value="desktop">Desktop</option>
+        <option value="mobile">Mobile</option>
+      </select>
+    </label><br /><br />
+
+    <!-- Asset Type -->
     <label>
       Asset Type:
       <select id="assetType">
@@ -19,21 +30,49 @@
       </select>
     </label><br /><br />
 
-    <!-- Hidden File Input -->
+    <!-- Upload -->
     <input type="file" id="fileInput" accept="image/*" style="display: none;" />
-    <!-- Upload Button -->
     <button id="uploadBtn">📁 Upload Sprite</button><br /><br />
 
+    <!-- Frame Size -->
     <label>
       Frame Width: <input type="number" id="frameWidth" value="32" />
     </label>
     <label>
       Frame Height: <input type="number" id="frameHeight" value="32" />
-    </label>
+    </label><br />
+
+    <!-- Animation Definitions -->
+    <label>
+      Animations (e.g. walk:0-3, idle:4-7):
+      <input type="text" id="animDefs" value="walk:0-3" />
+    </label><br />
+
+    <!-- Animation Selector -->
+    <label>
+      Play Animation:
+      <select id="animSelect"></select>
+    </label><br /><br />
+
+    <!-- Buttons -->
     <button id="loadSprite">▶️ Load Sprite</button>
+    <button id="darkModeToggle">🌙 Toggle Dark Mode</button>
+
+    <!-- Loading Bar -->
+    <div id="progressBarContainer">
+      <div id="progressBar"></div>
+    </div>
+    <div id="uploadStatus"></div>
   </div>
 
+  <!-- Phaser Game -->
   <div id="gameContainer"></div>
+
+  <!-- Mobile Joystick -->
+  <div id="mobileControls">
+    <div id="joystick"></div>
+    <button id="jumpBtn">🕹 Jump</button>
+  </div>
 
   <script src="main.js"></script>
 </body>
