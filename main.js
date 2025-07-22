@@ -86,6 +86,8 @@ document.getElementById('loadSprite').addEventListener('click', () => {
       player.play('autoAnim');
       player.setScale(Math.min(100 / frameHeight, 2));
 
+      document.getElementById('importStatus').textContent = '✅ Sprite imported successfully!';
+
       this.player = player;
       this.bullets = this.physics.add.group();
       this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -99,11 +101,14 @@ document.getElementById('loadSprite').addEventListener('click', () => {
         });
       } else {
         setupJoystick();
-        document.getElementById('jumpBtn').addEventListener('touchstart', () => {
+        const jumpBtn = document.getElementById('jumpBtn');
+        jumpBtn.addEventListener('touchstart', () => {
           joystickVector.y = -1;
+          jumpBtn.classList.add('flash');
         });
-        document.getElementById('jumpBtn').addEventListener('touchend', () => {
+        jumpBtn.addEventListener('touchend', () => {
           joystickVector.y = 0;
+          jumpBtn.classList.remove('flash');
         });
       }
 
@@ -137,15 +142,24 @@ document.getElementById('loadSprite').addEventListener('click', () => {
     function setupJoystick() {
       const joystick = document.getElementById('joystick');
       let origin = null;
-      joystick.addEventListener('touchstart', e => origin = e.touches[0]);
+
+      joystick.addEventListener('touchstart', e => {
+        origin = e.touches[0];
+      });
+
       joystick.addEventListener('touchmove', e => {
         if (!origin) return;
         const dx = e.touches[0].clientX - origin.clientX;
         const dy = e.touches[0].clientY - origin.clientY;
         joystickVector.x = Math.max(-1, Math.min(1, dx / 40));
         joystickVector.y = Math.max(-1, Math.min(1, dy / 40));
+        joystick.classList.add('active');
       });
-      joystick.addEventListener('touchend', () => joystickVector = { x: 0, y: 0 });
+
+      joystick.addEventListener('touchend', () => {
+        joystickVector = { x: 0, y: 0 };
+        joystick.classList.remove('active');
+      });
     }
   };
 
