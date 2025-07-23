@@ -55,6 +55,9 @@ function loadSpriteFromFile(file) {
     if (game) game.destroy(true);
     document.getElementById('mobileControls').style.display = isMobile ? 'flex' : 'none';
 
+    const blob = new Blob([reader.result]);
+    const spriteUrl = URL.createObjectURL(blob);
+
     game = new Phaser.Game({
       type: Phaser.AUTO,
       width: 800,
@@ -67,7 +70,7 @@ function loadSpriteFromFile(file) {
     });
 
     function preload() {
-      this.load.spritesheet('sprite', e.target.result, { frameWidth, frameHeight });
+      this.load.spritesheet('sprite', spriteUrl, { frameWidth, frameHeight });
     }
 
     function create() {
@@ -104,5 +107,5 @@ function loadSpriteFromFile(file) {
     }
   };
 
-  reader.readAsDataURL(file);
+  reader.readAsArrayBuffer(file);
 }
