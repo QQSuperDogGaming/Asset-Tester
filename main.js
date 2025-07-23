@@ -1,11 +1,8 @@
-let game;
-let isMobile = false;
-let joystickVector = { x: 0, y: 0 };
-let selectedDevice = null;
+let game, isMobile = false, joystickVector = { x: 0, y: 0 }, selectedDevice = null;
 
-window.addEventListener('load', () => {
+window.onload = () => {
   document.getElementById('deviceModal').style.display = 'flex';
-});
+};
 
 function selectDevice(type) {
   isMobile = type === 'mobile';
@@ -13,20 +10,34 @@ function selectDevice(type) {
   document.getElementById('deviceModal').style.display = 'none';
 }
 
-document.getElementById('uploadBtn').addEventListener('click', () => {
-  document.getElementById('fileInput').click();
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+
+uploadBtn.addEventListener('click', () => {
+  if (!selectedDevice) return alert('Please select a device first!');
+  fileInput.click();
 });
 
-document.getElementById('loadSprite').addEventListener('click', () => {
-  if (!selectedDevice) return alert('Please select a device first!');
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (!file) return;
 
-  const fileInput = document.getElementById('fileInput');
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  img.onload = () => {
+    document.getElementById('frameWidth').value = img.width;
+    document.getElementById('frameHeight').value = img.height;
+    URL.revokeObjectURL(url);
+    loadSpriteFromFile(file);
+  };
+  img.src = url;
+});
+
+function loadSpriteFromFile(file) {
   const frameWidth = parseInt(document.getElementById('frameWidth').value, 10);
   const frameHeight = parseInt(document.getElementById('frameHeight').value, 10);
   const fps = parseInt(document.getElementById('fpsInput').value, 10) || 10;
 
-  if (fileInput.files.length === 0) return alert('Please upload a sprite sheet');
-  const file = fileInput.files[0];
   const reader = new FileReader();
 
   reader.onprogress = e => {
@@ -42,8 +53,7 @@ document.getElementById('loadSprite').addEventListener('click', () => {
     document.getElementById('uploadStatus').textContent = '✅ Upload Completed';
 
     if (game) game.destroy(true);
-    if (isMobile) document.getElementById('mobileControls').style.display = 'flex';
-    else document.getElementById('mobileControls').style.display = 'none';
+    document.getElementById('mobileControls').style.display = isMobile ? 'flex' : 'none';
 
     game = new Phaser.Game({
       type: Phaser.AUTO,
@@ -51,71 +61,33 @@ document.getElementById('loadSprite').addEventListener('click', () => {
       height: 500,
       backgroundColor: '#1d1d1d',
       parent: 'gameContainer',
-      physics: {
-        default: 'arcade',
-        arcade: { debug: false }
-      },
-      scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-      },
+      physics: { default: 'arcade', arcade: { debug: false } },
+      scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
       scene: { preload, create, update }
     });
 
     function preload() {
-      this.load.spritesheet('sprite', e.target.result, {
-        frameWidth,
-        frameHeight
-      });
+      this.load.spritesheet('sprite', e.target.result, { frameWidth, frameHeight });
     }
 
     function create() {
       const totalFrames = this.textures.get('sprite').frameTotal;
-
       this.anims.create({
         key: 'autoAnim',
-        frames: this.anims.generateFrameNumbers('sprite', {
-          start: 0,
-          end: totalFrames - 1
-        }),
+        frames: this.anims.generateFrameNumbers('sprite', { start: 0, end: totalFrames - 1 }),
         frameRate: fps,
         repeat: -1
       });
-
       const player = this.physics.add.sprite(400, 250, 'sprite');
       player.play('autoAnim');
       player.setScale(Math.min(100 / frameHeight, 2));
-
       document.getElementById('importStatus').textContent = '✅ Sprite imported successfully!';
 
       this.player = player;
-      this.bullets = this.physics.add.group();
-      this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
-      if (!isMobile) {
-        this.cursors = this.input.keyboard.addKeys({
-          up: 'W',
-          down: 'S',
-          left: 'A',
-          right: 'D'
-        });
-      } else {
-        setupJoystick();
-        const jumpBtn = document.getElementById('jumpBtn');
-        jumpBtn.addEventListener('touchstart', () => {
-          joystickVector.y = -1;
-          jumpBtn.classList.add('flash');
-        });
-        jumpBtn.addEventListener('touchend', () => {
-          joystickVector.y = 0;
-          jumpBtn.classList.remove('flash');
-        });
-      }
-
-      this.shootCooldown = 0;
+      this.cursors = this.input.keyboard.addKeys({ up: 'W', down: 'S', left: 'A', right: 'D' });
     }
 
-    function update(_, delta) {
+    function update() {
       const speed = 200;
       this.player.setVelocity(0);
 
@@ -125,43 +97,12 @@ document.getElementById('loadSprite').addEventListener('click', () => {
         if (c.right.isDown) this.player.setVelocityX(speed);
         if (c.up.isDown) this.player.setVelocityY(-speed);
         if (c.down.isDown) this.player.setVelocityY(speed);
-        if (Phaser.Input.Keyboard.JustDown(this.fireKey) && this.shootCooldown <= 0) {
-          const bullet = this.bullets.create(this.player.x, this.player.y, 'sprite');
-          bullet.play('autoAnim');
-          bullet.setVelocityX(300);
-          this.shootCooldown = 300;
-        }
       } else {
         this.player.setVelocityX(joystickVector.x * speed);
         this.player.setVelocityY(joystickVector.y * speed);
       }
-
-      if (this.shootCooldown > 0) this.shootCooldown -= delta;
-    }
-
-    function setupJoystick() {
-      const joystick = document.getElementById('joystick');
-      let origin = null;
-
-      joystick.addEventListener('touchstart', e => {
-        origin = e.touches[0];
-      });
-
-      joystick.addEventListener('touchmove', e => {
-        if (!origin) return;
-        const dx = e.touches[0].clientX - origin.clientX;
-        const dy = e.touches[0].clientY - origin.clientY;
-        joystickVector.x = Math.max(-1, Math.min(1, dx / 40));
-        joystickVector.y = Math.max(-1, Math.min(1, dy / 40));
-        joystick.classList.add('active');
-      });
-
-      joystick.addEventListener('touchend', () => {
-        joystickVector = { x: 0, y: 0 };
-        joystick.classList.remove('active');
-      });
     }
   };
 
   reader.readAsDataURL(file);
-});
+}
