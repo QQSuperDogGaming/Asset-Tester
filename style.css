@@ -7,7 +7,6 @@ body {
   flex-direction: column;
   align-items: center;
 }
-
 #controls {
   padding: 15px;
   background: #222;
@@ -15,13 +14,11 @@ body {
   max-width: 600px;
   text-align: center;
 }
-
-#controls input, #controls select, #controls button {
+#controls input, #controls button {
   margin: 5px;
   padding: 6px;
   font-size: 14px;
 }
-
 #progressBarContainer {
   width: 100%;
   height: 10px;
@@ -29,21 +26,18 @@ body {
   margin-top: 10px;
   display: none;
 }
-
 #progressBar {
   height: 10px;
   background: lime;
   width: 0%;
   transition: width 0.2s;
 }
-
 #uploadStatus, #importStatus {
   margin-top: 5px;
   font-size: 14px;
   color: #0f0;
   font-weight: bold;
 }
-
 #gameBox {
   position: relative;
   width: 800px;
@@ -53,13 +47,6 @@ body {
   margin-top: 20px;
   overflow: hidden;
 }
-
-#gameContainer canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 #mobileControls {
   display: none;
   position: absolute;
@@ -70,7 +57,6 @@ body {
   gap: 20px;
   z-index: 10;
 }
-
 #joystick {
   width: 80px;
   height: 80px;
@@ -78,11 +64,9 @@ body {
   border-radius: 50%;
   touch-action: none;
 }
-
 #joystick.active {
   background: rgba(0, 255, 0, 0.3);
 }
-
 #jumpBtn {
   padding: 12px 20px;
   font-size: 18px;
@@ -91,13 +75,10 @@ body {
   border: none;
   border-radius: 8px;
 }
-
 #jumpBtn.flash {
   background: #0f0 !important;
   color: #000 !important;
 }
-
-/* Modal for device selection */
 .modal {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -107,7 +88,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
 .modal-content {
   background: #222;
   color: #fff;
@@ -115,7 +95,6 @@ body {
   border-radius: 12px;
   text-align: center;
 }
-
 .modal-content button {
   margin: 10px;
   padding: 12px 20px;
@@ -125,8 +104,4 @@ body {
   background: #444;
   color: #fff;
   cursor: pointer;
-}
-
-.modal-content button:hover {
-  background: #666;
 }
