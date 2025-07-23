@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>2D Asset Tester</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
 </head>
 <body>
-  <!-- Device Type Modal -->
   <div id="deviceModal" class="modal">
     <div class="modal-content">
       <h2>Select Your Device</h2>
@@ -15,44 +14,24 @@
       <button onclick="selectDevice('mobile')">📱 Mobile</button>
     </div>
   </div>
-
-  <!-- Controls Panel -->
   <div id="controls">
     <h1>2D Asset Tester</h1>
-
     <input type="file" id="fileInput" accept="image/*" style="display: none;" />
-    <button id="uploadBtn">📁 Upload Sprite</button><br /><br />
-
-    <label>
-      Frame Width: <input type="number" id="frameWidth" value="32" />
-    </label>
-    <label>
-      Frame Height: <input type="number" id="frameHeight" value="32" />
-    </label>
-    <label>
-      Frame Rate (FPS): <input type="number" id="fpsInput" value="10" />
-    </label><br /><br />
-
-    <button id="loadSprite">▶️ Load Sprite</button>
-
-    <div id="progressBarContainer">
-      <div id="progressBar"></div>
-    </div>
+    <button id="uploadBtn">📁 Upload & Load Sprite</button><br /><br />
+    <label>Frame Width: <input type="number" id="frameWidth" value="32" /></label>
+    <label>Frame Height: <input type="number" id="frameHeight" value="32" /></label>
+    <label>Frame Rate (FPS): <input type="number" id="fpsInput" value="10" /></label><br /><br />
+    <div id="progressBarContainer"><div id="progressBar"></div></div>
     <div id="uploadStatus"></div>
     <div id="importStatus"></div>
   </div>
-
-  <!-- Game Area -->
   <div id="gameBox">
     <div id="gameContainer"></div>
-
-    <!-- Mobile Controls -->
     <div id="mobileControls">
       <div id="joystick"></div>
       <button id="jumpBtn">🕹 Jump</button>
     </div>
   </div>
-
   <script src="main.js"></script>
 </body>
 </html>
